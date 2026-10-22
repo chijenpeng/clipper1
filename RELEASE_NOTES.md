@@ -6,8 +6,8 @@ Clipper1 is a stereo clipper with a Threshold, an Out Ceiling, an adjustable sof
 8x oversampling. It is an independent plug-in identity (`com.c0dypeng.clipper1`, `Cdpg` / `Clp1`).
 
 - macOS Universal: AU and VST3, arm64 + x86_64.
-- Windows x64: VST3, built and tested natively with MSVC on windows-2022 by the release workflow.
-  Requires the Microsoft Visual C++ x64 Redistributable.
+- Windows x64: VST3, built natively with MSVC on windows-2022; CTest 1/1 (clipper1_test, 0 failures)
+  passed there. Requires the Microsoft Visual C++ x64 Redistributable.
 - macOS bundles are ad-hoc signed, not notarized. Windows builds are unsigned.
 - Checked before release: CTest 1/1 (clipper1_test: 77 checks, 0 failures); editor snapshot rendered; AU and VST3 slices arm64 + x86_64; ad-hoc signatures, ZIP integrity and SHA-256 verified by the packaging script.
 
