@@ -8,6 +8,13 @@ namespace
     const juce::Identifier versionId ("version");
     constexpr int kStateVersion = 1;
 
+    // Lock-free running maximum: keeps the largest value stored since the editor last exchanged it to zero.
+    void storeMax (std::atomic<float>& target, float value) noexcept
+    {
+        auto current = target.load (std::memory_order_relaxed);
+        while (value > current && ! target.compare_exchange_weak (current, value, std::memory_order_relaxed)) {}
+    }
+
     juce::AudioParameterFloatAttributes dbAttributes()
     {
         return juce::AudioParameterFloatAttributes().withLabel ("dB").withStringFromValueFunction (
@@ -33,7 +40,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout Clipper1Processor::createLay
                                          juce::AudioParameterFloatAttributes().withLabel ("%").withStringFromValueFunction (
                                              [] (float v, int) { return juce::String (juce::roundToInt (v)) + " %"; })));
     layout.add (std::make_unique<Choice> (juce::ParameterID { ParamID::oversampling, 1 }, "Oversampling", juce::StringArray { "Off", "2x", "4x", "8x" }, 2));
-    layout.add (std::make_unique<Bool> (juce::ParameterID { ParamID::link, 1 }, "Link Threshold and Ceiling", false));
+    layout.add (std::make_unique<Bool> (juce::ParameterID { ParamID::link, 1 }, "Link Threshold and Ceiling", true));
     layout.add (std::make_unique<Bool> (juce::ParameterID { ParamID::inputLink, 1 }, "Link Inputs", true));
     return layout;
 }
@@ -107,11 +114,11 @@ void Clipper1Processor::processBlock (juce::AudioBuffer<float>& buffer, juce::Mi
     }
 
     const auto& m = clipperDsp.meters();
-    inputPeakL.store (m.inputPeak[0]);
-    inputPeakR.store (numChannels > 1 ? m.inputPeak[1] : m.inputPeak[0]);
-    outputPeakL.store (m.outputPeak[0]);
-    outputPeakR.store (numChannels > 1 ? m.outputPeak[1] : m.outputPeak[0]);
-    clipDb.store (m.clipDb);
+    storeMax (inputPeakL, m.inputPeak[0]);
+    storeMax (inputPeakR, numChannels > 1 ? m.inputPeak[1] : m.inputPeak[0]);
+    storeMax (outputPeakL, m.outputPeak[0]);
+    storeMax (outputPeakR, numChannels > 1 ? m.outputPeak[1] : m.outputPeak[0]);
+    storeMax (clipDb, m.clipDb);
 }
 
 void Clipper1Processor::writeBack (const char* id, std::atomic<float>& pending)

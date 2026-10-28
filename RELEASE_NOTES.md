@@ -1,5 +1,16 @@
 # Clipper1 release notes
 
+## v0.1.1
+
+- Meters: the Clip meter and the input/output peak meters now show every clip and peak between two
+  screen refreshes. Before, a short clip (a snare hit among fast kicks) could be missed by the
+  display. Audio is unchanged.
+- Link between Threshold and Out Ceiling is now on by default for new instances; saved sessions keep
+  their setting.
+- Checked before release: CTest 1/1 (clipper1_test, ALL PASSED, 0 failures); editor snapshot rendered
+  and identical to the development build's docs/editor.png; AU and VST3 slices arm64 + x86_64.
+- Windows x64: result pending.
+
 ## v0.1.0
 
 Clipper1 is a stereo clipper with a Threshold, an Out Ceiling, an adjustable soft knee and 2x, 4x or

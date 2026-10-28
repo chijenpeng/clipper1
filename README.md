@@ -36,7 +36,7 @@ Get the latest packages from the [Clipper1 releases page](https://github.com/chi
 | Input L / Input R (`input_l`, `input_r`) | -30..0 dB | 0 | Input level per channel, before the clip. Link Inputs moves them together (a UI convenience; the two values are what is stored). |
 | Threshold (`threshold`) | -30..0 dB | 0 | Peaks above this are clipped. Everything below gets a constant gain of Ceiling - Threshold, so lowering the threshold raises the level and clips more. |
 | Out Ceiling (`ceiling`) | -30..0 dB | 0 | The highest level that leaves the plug-in. |
-| Link (`link`) | on/off | off | Moves Threshold and Out Ceiling together by the same number of dB. Turning it on never changes the sound. |
+| Link (`link`) | on/off | on | Moves Threshold and Out Ceiling together by the same number of dB. Turning it on never changes the sound. |
 | Link Inputs (`input_link`) | on/off | on | UI link for the two input faders. |
 | Softness (`softness`) | 0..100 % | 0 | Knee width. 0 % is a hard clip. Higher values start bending below the Threshold and reach the ceiling later. |
 | Oversampling (`oversampling`) | Off / 2x / 4x / 8x | 4x | Clips at 2, 4 or 8 times the sample rate; adds latency, reported to the host. |

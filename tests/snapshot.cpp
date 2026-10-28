@@ -55,13 +55,33 @@ int main (int argc, char** argv)
     Clipper1Editor editor (clipperProcessor);
     editor.setSize (juce::roundToInt (Clipper1Surface::kWidth * editorScale), juce::roundToInt (Clipper1Surface::kHeight * editorScale));
 
+    // The meters hold the maximum since the last editor read, so clear them before each block:
+    // afterwards they hold exactly the last block, which is what the snapshot shows.
+    const auto clearMeters = [&clipperProcessor]
+    {
+        clipperProcessor.inputPeakL.store (0.0f);  clipperProcessor.inputPeakR.store (0.0f);
+        clipperProcessor.outputPeakL.store (0.0f); clipperProcessor.outputPeakR.store (0.0f);
+        clipperProcessor.clipDb.store (0.0f);
+    };
     for (int pos = 0; pos + block <= length; pos += block)
     {
+        clearMeters();
         juce::AudioBuffer<float> chunk (audio.getArrayOfWritePointers(), 2, pos, block);
         processor->processBlock (chunk, midi);
     }
 
-    juce::MessageManager::getInstance()->runDispatchLoopUntil (150);   // let the editor's timer read the meters
+    const float shownInL = clipperProcessor.inputPeakL.load(), shownInR = clipperProcessor.inputPeakR.load();
+    const float shownOutL = clipperProcessor.outputPeakL.load(), shownOutR = clipperProcessor.outputPeakR.load();
+    const float shownClip = clipperProcessor.clipDb.load();
+    // The editor's timer exchanges the meters to 0 on each read, so re-store the last block
+    // before every short dispatch slice (ticks are 33 ms apart, slices 10 ms): each read sees it.
+    for (int slice = 0; slice < 15; ++slice)
+    {
+        clipperProcessor.inputPeakL.store (shownInL);   clipperProcessor.inputPeakR.store (shownInR);
+        clipperProcessor.outputPeakL.store (shownOutL); clipperProcessor.outputPeakR.store (shownOutR);
+        clipperProcessor.clipDb.store (shownClip);
+        juce::MessageManager::getInstance()->runDispatchLoopUntil (10);
+    }
     const auto image = editor.createComponentSnapshot (editor.getLocalBounds(), true, pixelScale);
     output.deleteFile();
     juce::FileOutputStream out (output);

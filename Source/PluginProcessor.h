@@ -46,7 +46,7 @@ public:
     // For the UI
     juce::AudioProcessorValueTreeState apvts;
 
-    /** Block maxima, linear (0..1) and dB of clip; raw, no ballistics. */
+    /** Maxima since the editor last read them (it exchanges them to zero), linear (0..1) and dB of clip; raw, no ballistics. */
     std::atomic<float> inputPeakL { 0.0f }, inputPeakR { 0.0f }, outputPeakL { 0.0f }, outputPeakR { 0.0f }, clipDb { 0.0f };
     /** What the clipper is actually using after the Link coupling (equal to the parameters
         except for the block or two before a coupled write-back lands). */

@@ -587,13 +587,13 @@ Clipper1Surface::Clipper1Surface (Clipper1Processor& p)
       threshold (p.apvts, ParamID::threshold, "Threshold", "Peaks above this are clipped. Everything below gets a constant gain of Ceiling minus Threshold, "
                                                            "so pulling it down below the input peaks raises the level and clips more."),
       ceiling (p.apvts, ParamID::ceiling, "Out Ceiling", "The highest level that leaves the plug-in. -0.3 to -0.5 dB is the usual choice for delivery."),
-      inMeterL (Meter::Kind::peak, [&p] { return toDb (p.inputPeakL.load()); }, "Input peaks", kInputMeterHelp),
-      inMeterR (Meter::Kind::peak, [&p] { return toDb (p.inputPeakR.load()); }, "Input peaks", kInputMeterHelp),
-      clipMeter (Meter::Kind::clip, [&p] { return p.clipDb.load(); }, "Clip",
+      inMeterL (Meter::Kind::peak, [&p] { return toDb (p.inputPeakL.exchange (0.0f)); }, "Input peaks", kInputMeterHelp),
+      inMeterR (Meter::Kind::peak, [&p] { return toDb (p.inputPeakR.exchange (0.0f)); }, "Input peaks", kInputMeterHelp),
+      clipMeter (Meter::Kind::clip, [&p] { return p.clipDb.exchange (0.0f); }, "Clip",
                  "How much the clip is turning peaks down right now: the largest ratio between the level going in and the level coming "
                  "out, measured at the rate the clip runs, with a 1.5 s hold on the deepest."),
-      outMeterL (Meter::Kind::peak, [&p] { return toDb (p.outputPeakL.load()); }, "Output peaks", kOutputMeterHelp),
-      outMeterR (Meter::Kind::peak, [&p] { return toDb (p.outputPeakR.load()); }, "Output peaks", kOutputMeterHelp),
+      outMeterL (Meter::Kind::peak, [&p] { return toDb (p.outputPeakL.exchange (0.0f)); }, "Output peaks", kOutputMeterHelp),
+      outMeterR (Meter::Kind::peak, [&p] { return toDb (p.outputPeakR.exchange (0.0f)); }, "Output peaks", kOutputMeterHelp),
       inputLink (*p.apvts.getParameter (ParamID::inputLink), "Link", "Moves Input L and Input R together, keeping their offset. The two values are what is stored."),
       link (*p.apvts.getParameter (ParamID::link), "Link", "Moves Threshold and Out Ceiling together by the same number of dB. Turning it on never changes the sound."),
       softness (p.apvts, ParamID::softness, "Softness", "Width of the knee. 0 % is a hard clip: the signal is straight up to the ceiling and then flat. "
